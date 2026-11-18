@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Keep quiz questions, option score mappings, reports, progress, link sharing, and PNG generation in separate browser-safe modules under src/lib/quiz so editorial changes cannot alter scoring accidentally.
+- Use the index route's validated search parameters for quiz/result states so shared results work on direct loads without extra routes or server dependencies.
+- Derive scores from the complete answer array, never click counters, and resolve top-score ties by scanning answers backward so edits and repeated selections remain safe.
+- Generate standalone PNG templates through Canvas using global semantic color tokens so downloads remain independent of page layout and external image CORS.
