@@ -1,3 +1,4 @@
+import { quizContent as content } from "@/data/quizContent";
 import { results } from "./results";
 import type { ResultType } from "./scoring";
 
@@ -21,15 +22,15 @@ export async function generateCard(type: ResultType): Promise<Blob> {
   const canvas = document.createElement("canvas");
   canvas.width = 1080; canvas.height = 1440;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("此浏览器暂不支持图片生成");
+  if (!ctx) throw new Error(content.errors.canvas);
   ctx.fillStyle = token("--background"); ctx.fillRect(0, 0, 1080, 1440);
   ctx.strokeStyle = token(`--house-${type}`); ctx.lineWidth = 2; ctx.strokeRect(48, 48, 984, 1344);
   ctx.strokeStyle = token("--border"); ctx.strokeRect(62, 62, 956, 1316);
   ctx.textAlign = "center";
   ctx.fillStyle = token("--muted-foreground"); ctx.font = '22px "Noto Sans SC", sans-serif';
-  ctx.fillText("K-POP SORTING HAT  /  我的分院档案", 540, 132);
+  ctx.fillText(content.card.heading, 540, 132);
   ctx.fillStyle = token("--foreground"); ctx.font = '36px "Noto Serif SC", serif';
-  ctx.fillText("K-pop 自己的分院帽", 540, 202);
+  ctx.fillText(content.brand.name, 540, 202);
   ctx.save(); ctx.translate(540, 370);
   ctx.strokeStyle = token(`--house-${type}`); ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(0, 0, 98, 0, Math.PI * 2); ctx.stroke();
@@ -50,21 +51,21 @@ export async function generateCard(type: ResultType): Promise<Blob> {
   wrap(ctx, report.description, 540, 956, 810, 49);
   ctx.fillStyle = token(`--house-${type}`); ctx.font = '23px "Noto Sans SC", sans-serif'; ctx.fillText(report.keywords.join("  ·  "), 540, 1218);
   ctx.fillStyle = token("--muted-foreground"); ctx.font = '19px "Noto Sans SC", sans-serif';
-  ctx.fillText("知心 · 性情 · 大气 · 巧思，你是哪一种 K-pop 成分？", 540, 1304);
-  ctx.font = '16px "Noto Sans SC", sans-serif'; ctx.fillText("娱乐向测试 · 不代表成员真实私下性格", 540, 1348);
-  return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("图片生成失败，请重试")), "image/png"));
+  ctx.fillText(content.card.subtitle, 540, 1304);
+  ctx.font = '16px "Noto Sans SC", sans-serif'; ctx.fillText(content.card.disclaimer, 540, 1348);
+  return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error(content.errors.card)), "image/png"));
 }
 
 export function downloadCard(blob: Blob, type: ResultType) {
   const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a"); anchor.href = url; anchor.download = `K-pop分院帽-${results[type].name}.png`;
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${content.card.filenamePrefix}-${results[type].name}.png`;
   document.body.appendChild(anchor); anchor.click(); anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 export async function shareCard(blob: Blob, type: ResultType) {
-  const file = new File([blob], `K-pop分院帽-${results[type].name}.png`, { type: "image/png" });
+  const file = new File([blob], `${content.card.filenamePrefix}-${results[type].name}.png`, { type: "image/png" });
   if (navigator.canShare?.({ files: [file] }) && navigator.share) {
-    await navigator.share({ files: [file], title: "K-pop 自己的分院帽" }); return true;
+    await navigator.share({ files: [file], title: content.brand.name }); return true;
   }
   return false;
 }

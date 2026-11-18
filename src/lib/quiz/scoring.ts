@@ -1,3 +1,4 @@
+import { quizContent as content } from "@/data/quizContent";
 export const types = ["knowing", "personality", "bold", "creative"] as const;
 export type ResultType = (typeof types)[number];
 export type Answers = (number | null)[];
@@ -35,7 +36,7 @@ export function isComplete(answers: Answers): boolean {
 }
 
 export function calculateResult(answers: Answers) {
-  if (!isComplete(answers)) throw new Error("请先完成全部 20 道题");
+  if (!isComplete(answers)) throw new Error(content.errors.incomplete);
   const scores: Record<ResultType, number> = { knowing: 0, personality: 0, bold: 0, creative: 0 };
   answers.forEach((answer, index) => {
     const type = typeof answer === "number" ? scoreMap[index]?.[answer] : undefined;
@@ -43,10 +44,12 @@ export function calculateResult(answers: Answers) {
   });
   const highest = Math.max(...Object.values(scores));
   const tied = types.filter((type) => scores[type] === highest);
+  if (tied.length === 1 && tied[0]) return { type: tied[0], scores };
+  // A top-scoring category has at least one answer, so the backward scan always finds it.
   for (let index = 19; index >= 0; index -= 1) {
     const answer = answers[index];
     const type = typeof answer === "number" ? scoreMap[index]?.[answer] : undefined;
     if (type && tied.includes(type)) return { type, scores };
   }
-  throw new Error("无法计算结果");
+  throw new Error(content.errors.calculation);
 }
